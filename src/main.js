@@ -6,6 +6,7 @@ deck.shuffle();
 let player = new Player();
 let dealer = new Player();
 
+let cardDisplay = document.getElementById("card-display"); // area that displays cards on the table
 let playerCardDisplay = document.getElementById("player-cards");
 let dealerCardDisplay = document.getElementById("dealer-cards");
 let startBtn = document.getElementById("start-btn"); // button to start a round
@@ -14,8 +15,6 @@ let controls = document.getElementById("controls"); // group of controls to hit 
 let betEntry = document.getElementById("bet-entry"); // group of controls for placing bet
 let betDisplay = document.getElementById("bet-display"); // UI display of the player's bet
 let roundResults = document.getElementById("round-results"); // UI display for winner of the round
-
-let roundInProgress = false;
 
 const updatePlayerCardDisplay = () => {
     let html = "";
@@ -62,10 +61,8 @@ const updatePointDisplay = () => {
     pointDisplay.innerHTML = "Points available: " + player.points;
 }
 
-const startRound = () => {
+const dealHands = () => {
     // deal two cards to player and dealer and display them
-    roundInProgress = true;
-
     for(let i = 0; i < 2; i++) {
         player.giveCard(getCard());
         dealer.giveCard(getCard());
@@ -73,10 +70,18 @@ const startRound = () => {
 
     updatePlayerCardDisplay();
     updateDealerCardDisplay();
+}
 
+const startRound = () => {
+    // hide start button and cards, show the bet entry controls
     startBtn.style.display = "none";
     roundResults.style.display = "none";
+    cardDisplay.style.visibility = "hidden";
     betEntry.style.display = "block";
+
+    // deal cards even though they are invisible until bets are placed
+    // this is so the layout doesn't get messed up when the card display section is empty
+    dealHands();
 
     updatePointDisplay();
 }
@@ -105,6 +110,9 @@ const placeBet = () => {
     // hide controls for betting and show controls to hit/stay
     betEntry.style.display = "none";
     controls.style.display = "block";
+
+    // show the cards that have been dealt
+    cardDisplay.style.visibility = "visible";
 }
 
 const endRound = () => {
