@@ -70,9 +70,9 @@ const startRound = () => {
     updatePlayerCardDisplay();
     updateDealerCardDisplay();
 
-    startBtn.style.visibility = "hidden";
-    roundResults.style.visibility = "hidden";
-    betEntry.style.visibility = "visible";
+    startBtn.style.display = "none";
+    roundResults.style.display = "none";
+    betEntry.style.display = "block";
 
     // update point display
     pointDisplay.innerHTML = "Points available: " + player.points;
@@ -87,8 +87,11 @@ const decreaseBet = () => {
 }
 
 const increaseBet = () => {
-    player.bet += 10;
-    betDisplay.innerHTML = player.bet;
+    // 200 is the max bet allowed
+    if(player.bet < 200) {
+        player.bet += 10;
+        betDisplay.innerHTML = player.bet;
+    }
 }
 
 const placeBet = () => {
@@ -97,14 +100,14 @@ const placeBet = () => {
     pointDisplay.innerHTML = "Points available: " + player.points;
 
     // hide controls for betting and show controls to hit/stay
-    betEntry.style.visibility = "hidden";
-    controls.style.visibility = "visible";
+    betEntry.style.display = "none";
+    controls.style.display = "block";
 }
 
 const endRound = () => {
     // hide controls and play the dealers
-    controls.style.visibility = "hidden";
-    roundResults.style.visibility = "visible";
+    controls.style.display = "none";
+    roundResults.style.display = "block";
 
     if(player.getCardTotal() <= 21) {
         // if player didn't bust, dealer will play their hand
@@ -126,6 +129,7 @@ const endRound = () => {
         }
         else {
             roundResults.innerHTML = "Draw";
+            player.points += player.bet; // give the  player their bet back
         }
     }
     else {
@@ -137,7 +141,7 @@ const endRound = () => {
 
     // at the end of the round, show the button to start a new round, reset the player's bet,
     // and reset the cards in both player and dealer's hands
-    startBtn.style.visibility = "visible";
+    startBtn.style.display = "block";
     player.bet = 10;
     betDisplay.innerHTML = player.bet; // reset display to the default player bet
     player.resetCards();

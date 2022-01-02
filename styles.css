@@ -1,0 +1,13 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#card-display {
+    display: inline-block;
+    margin-right: 10%;
+    margin-bottom: 15px;
+}
+
+#controls-display {
+    display: inline-block;
+}
