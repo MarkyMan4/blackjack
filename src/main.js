@@ -58,6 +58,10 @@ const getCard = () => {
     return card;
 }
 
+const updatePointDisplay = () => {
+    pointDisplay.innerHTML = "Points available: " + player.points;
+}
+
 const startRound = () => {
     // deal two cards to player and dealer and display them
     roundInProgress = true;
@@ -74,8 +78,7 @@ const startRound = () => {
     roundResults.style.display = "none";
     betEntry.style.display = "block";
 
-    // update point display
-    pointDisplay.innerHTML = "Points available: " + player.points;
+    updatePointDisplay();
 }
 
 const decreaseBet = () => {
@@ -97,7 +100,7 @@ const increaseBet = () => {
 const placeBet = () => {
     // subtract bet from player points and refresh the display
     player.points -= player.bet;
-    pointDisplay.innerHTML = "Points available: " + player.points;
+    updatePointDisplay();
 
     // hide controls for betting and show controls to hit/stay
     betEntry.style.display = "none";
@@ -120,9 +123,7 @@ const endRound = () => {
         if(player.getCardTotal() > dealer.getCardTotal() || dealer.getCardTotal() > 21) {
             roundResults.innerHTML = "You won!";
             player.points += (player.bet * 2); // award player their winnings
-
-            // update point display
-            pointDisplay.innerHTML = "Points available: " + player.points;
+            updatePointDisplay();
         }
         else if(player.getCardTotal() < dealer.getCardTotal() && dealer.getCardTotal() <= 21) {
             roundResults.innerHTML = "You lost!";
@@ -130,6 +131,7 @@ const endRound = () => {
         else {
             roundResults.innerHTML = "Draw";
             player.points += player.bet; // give the  player their bet back
+            updatePointDisplay();
         }
     }
     else {
