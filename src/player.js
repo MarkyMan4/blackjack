@@ -1,6 +1,7 @@
 class Player {
     constructor(initialPoints=100) {
         this.cards = [];
+        this.splitCards = []; // should only be populated when the player splits
         this.points = initialPoints;
         this.bet = 10; // minimum bet is 10
     }
@@ -9,12 +10,22 @@ class Player {
         this.cards.push(card);
     }
 
+    giveSplitCard = (card) => {
+        this.splitCards.push(card);
+    }
+
     resetCards = () => {
         this.cards = [];
     }
 
-    // calculate the total of the current cards in the players hand
-    getCardTotal = () => {
+    // this assumes the player currently has two cards in their hand
+    // takes one card and moves it to splitCards
+    split = () => {
+        this.splitCards.push(this.cards.pop());
+    }
+
+    // gets the total of a hand given a list of cards
+    getHandCardTotal = (cards) => {
         let total = 0;
 
         // ace is worth 11 if it doesn't make the hand go over 21
@@ -24,7 +35,7 @@ class Player {
         let aces = [];
 
         // make separate lists of non-aces and aces, then combine them with the aces last
-        this.cards.forEach(card => {
+        cards.forEach(card => {
             if(card.rank === 'ace') {
                 aces.push(card);
             }
@@ -49,5 +60,15 @@ class Player {
         });
 
         return total;
+    }
+
+    // calculate the total of the current cards in the players hand
+    getCardTotal = () => {
+        return this.getHandCardTotal(this.cards);
+    }
+
+    // calculate the total of the current cards in the players hand
+    getSplitCardTotal = () => {
+        return this.getHandCardTotal(this.splitCards);
     }
 }
