@@ -24,6 +24,7 @@ let roundResults = document.getElementById("round-results"); // UI display for w
 let splitBtn = document.getElementById("split-btn");
 let splitDisplay = document.getElementById("split-display");
 let splitCardDisplay = document.getElementById("split-cards");
+let activeHandDisplay = document.getElementById("active-hand-display");
 
 const updatePlayerCardDisplay = () => {
     let html = "";
@@ -99,6 +100,8 @@ const startRound = () => {
     roundResults.style.display = "none";
     cardDisplay.style.visibility = "hidden";
     betEntry.style.display = "block";
+    splitDisplay.style.display = "none"; // hide split hand display
+    playerSplit = false;
 
     handBeingPlayed = 0; // reset to playing the primary hand
 
@@ -134,16 +137,21 @@ const placeBet = () => {
     betEntry.style.display = "none";
     controls.style.display = "block";
 
+    // show the split button if the two cards the player was dealt are the same rank (i.e. two kings)
+    if(player.cards[0].rank === player.cards[1].rank) 
+        splitBtn.style.visibility = "visible";
+
     // show the cards that have been dealt
     cardDisplay.style.visibility = "visible";
 }
 
 const stay = () => {
-    if(split === false || handBeingPlayed >= 1) {
+    if(!playerSplit || handBeingPlayed >= 1) {
         endRound();
     }
     else {
         handBeingPlayed++;
+        activeHandDisplay.innerHTML = "Playing second hand";
     }
 }
 
@@ -154,35 +162,41 @@ const endRound = () => {
     let mainHandResult = ''; // win, lose or draw
     let splitHandResult = '';
 
-    if(player.getCardTotal() <= 21 || player.getSplitCardTotal() <= 21) {
+    if(player.getCardTotal() <= 21 || (playerSplit && player.getSplitCardTotal() <= 21)) {
         // if player didn't bust, dealer will play their hand
         playDealerHand();
 
         // determine the outcome of the players main hand
-        if(player.getCardTotal() > dealer.getCardTotal() || dealer.getCardTotal() > 21) {
+        if((player.getCardTotal() > 21 && dealer.getCardTotal() > 21) || player.getCardTotal() === dealer.getCardTotal()) {
+            // both bust or both have the same score
+            mainHandResult = 'draw';
+            player.points += player.bet; // give the  player their bet back
+        }
+        else if(player.getCardTotal() <= 21 && (dealer.getCardTotal() > 21 || player.getCardTotal() > dealer.getCardTotal())) {
+            // player didn't bust and dealer did bust
+            // OR player and dealer didn't bust, but player has higher score
             mainHandResult = 'win';
             player.points += (player.bet * 2); // award player their winnings
         }
-        else if(player.getCardTotal() < dealer.getCardTotal() && dealer.getCardTotal() <= 21) {
+        else { 
             mainHandResult = 'lose';
-        }
-        else {
-            mainHandResult = 'draw';
-            player.points += player.bet; // give the  player their bet back
         }
 
         // determine the outcome of the players split hand if they have one
         if(playerSplit) {
-            if(player.getSplitCardTotal() > dealer.getCardTotal() || dealer.getCardTotal() > 21) {
-                mainHandResult = 'win';
+            if((player.getSplitCardTotal() > 21 && dealer.getCardTotal() > 21) || player.getSplitCardTotal() === dealer.getCardTotal()) {
+                // both bust or both have the same score
+                splitHandResult = 'draw';
+                player.points += player.bet; // give the  player their bet back
+            }
+            else if(player.getSplitCardTotal() <= 21 && (dealer.getCardTotal() > 21 || player.getSplitCardTotal() > dealer.getCardTotal())) {
+                // player didn't bust and dealer did bust
+                // OR player and dealer didn't bust, but player has higher score
+                splitHandResult = 'win';
                 player.points += (player.bet * 2); // award player their winnings
             }
-            else if(player.getSplitCardTotal() < dealer.getCardTotal() && dealer.getCardTotal() <= 21) {
-                mainHandResult = 'lose';
-            }
-            else {
-                mainHandResult = 'draw';
-                player.points += player.bet; // give the  player their bet back
+            else { 
+                splitHandResult = 'lose';
             }
         }
     }
@@ -197,11 +211,14 @@ const endRound = () => {
     // show the dealer's final hand and score
     updateDealerCardDisplay(true);
 
-    if(mainHandResult === 'win' || splitHandResult === 'win') {
+    if(mainHandResult === 'win' && (splitHandResult === 'win' || splitHandResult === '')) { // split hand empty string means they didn't split
         roundResults.innerHTML = "You won!";
     }
-    else if(mainHandResult === 'draw' && (splitHandResult === 'draw' || splitHandResult === '')) { // split hand empty string means they didn't split
-        roundResults.innerHTML = "Draw";
+    else if(mainHandResult === 'win' || splitHandResult === 'win') { // winning one hand means the player broke even
+        roundResults.innerHTML = "You broke even";
+    }
+    else if(mainHandResult === 'draw' && (splitHandResult === 'draw' || splitHandResult === '')) { // draw for both hands is breaking even
+        roundResults.innerHTML = "You broke even";
     }
     else {
         roundResults.innerHTML = "You lost!";
@@ -210,6 +227,7 @@ const endRound = () => {
     // at the end of the round, show the button to start a new round, reset the player's bet,
     // and reset the cards in both player and dealer's hands
 
+    activeHandDisplay.style.display = "none"; // hide the output telling which hand the player is actively playing
     startBtn.style.display = "block";
     player.bet = 10;
     betDisplay.innerHTML = player.bet; // reset display to the default player bet
@@ -245,6 +263,8 @@ const split = () => {
     player.split();
     splitDisplay.style.display = "block"; // show split hand display
     splitBtn.style.visibility = "hidden"; // hide the split button
+    activeHandDisplay.style.display = "block";
+    activeHandDisplay.innerHTML = "Playing first hand";
 
     // subtract bet from player points and refresh the display
     player.points -= player.bet;

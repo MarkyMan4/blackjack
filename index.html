@@ -28,10 +28,11 @@
     </div>
 
     <div id="controls-display">
+        <h3 id="active-hand-display" style="color: red; display: none;"></h3>
         <div id="controls" style="display: none;">
             <button onclick="hit()">hit</button>
             <button onclick="stay()">stay</button>
-            <button id="split-btn" onclick="split()">split</button>
+            <button id="split-btn" onclick="split()" style="visibility: hidden;">split</button>
         </div>
         <div id="bet-entry" style="display: none;">
             <button onclick="decreaseBet()">-</button>&nbsp;
